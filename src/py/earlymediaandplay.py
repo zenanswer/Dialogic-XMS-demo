@@ -21,7 +21,7 @@ class EarlyMediaAndPlay(xmsapp.XMSAPP):
                     resource_type, resource_id,
                     'file://verification/verification_intro.wav', 4)
 
-    def On_Hangup(self):
+    def On_Hangup(self, resource_type, resource_id, reason):
         self.answered = False
 
 
