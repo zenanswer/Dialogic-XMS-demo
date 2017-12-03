@@ -1,12 +1,15 @@
-#File list
+File list
+===
 
 -   xmsrest.xsd - Dialogic XMS RESTFull Body Payload Schema Definition
 -   xmsrest.py - Data Struct Definition for Python, be generated from "xmsrest.xsd"
 -   xmsapp.py - Python wrapper for Dialogic XMS RESTFull API
 -   earlymediaandplay.py - Sample code for showing early-media, play audio and play&collect.
+-   conference.py - Sample code for conference room
 -   README.md - README file
 
-#Dialogic XMS XSD file for RESTFull API
+Dialogic XMS XSD file for RESTFull API
+===
 
  Location
 
@@ -16,7 +19,8 @@
 [root@xms01 ~]#
 ```
 
-#Generate Python data struct from XSD file
+Generate Python data struct from XSD file
+===
 
 [generateDS 2.28.2](https://pypi.python.org/pypi/generateDS/)
 

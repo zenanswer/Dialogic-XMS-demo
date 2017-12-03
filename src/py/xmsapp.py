@@ -80,6 +80,14 @@ class XMSAPP(object):
         print response.status_code, response.reason
         print response.text
 
+    def Drop_Call(self, resource_type, resource_id):
+        path = '/default/calls/' + resource_id
+        payload = {'appid': self.app}
+        response = requests.delete(self.url+path, params=payload)
+        print '===== Drop_Call ===='
+        print response.status_code, response.reason
+        print response.text
+
     def Play(self, resource_type, resource_id, audio_file):
         path = '/default/calls/' + resource_id
         payload = {'appid': self.app}
@@ -104,14 +112,16 @@ class XMSAPP(object):
         path = '/default/calls/' + resource_id
         payload = {'appid': self.app}
 
+        timeout = 2
+
         play_source = xmsrest.play_source(
                 audio_uri=audio_file, audio_type='audio/x-wav')
         playcollect = xmsrest.playcollect(
                 play_source=play_source,
                 cleardigits='yes',
                 max_digits=str(digit_num),
-                timeout='10s',
-                interdigit_timeout='2s')
+                timeout=str(int(timeout*digit_num*1.5)) + 's',
+                interdigit_timeout=str(timeout) + 's')
         call_action = xmsrest.call_action(playcollect=playcollect)
         call = xmsrest.call(call_action=call_action)
         web_service = xmsrest.web_service(call=call)
@@ -147,7 +157,21 @@ class XMSAPP(object):
         pass
 
     def __handle_hangup(self, event_type, event):
-        self.On_Hangup()
+        resource_type = event.get_event().get_resource_type()
+        resource_id = event.get_event().get_resource_id()
+        event_data = event.get_event().get_event_data()
+        call_id = None
+        reason = None
+        for data in event_data:
+            if data.get_name() == 'call_id':
+                call_id = data.get_value()
+            if data.get_name() == 'reason':
+                reason = data.get_value()
+        print 'resource_type:', resource_type
+        print 'resource_id:', resource_id
+        print 'call_id:', call_id
+        print 'reason:', reason
+        self.On_Hangup(resource_type, resource_id, reason)
 
     def __handle_other(self, event_type, event):
         pass
@@ -239,6 +263,93 @@ class XMSAPP(object):
             event_type = event.get_event().get_type()
             print '[EVENT]', event_type
             self.__eventhandlers[event_type](event_type, event)
+
+    def On_Incomming(
+            self, resource_type, resource_id, call_id, called_uri, caller_uri):
+        pass
+
+    def On_PlayEnd(
+            self, resource_type, resource_id, reason, digits):
+        pass
+
+    def On_Hangup(self, resource_type, resource_id, reason):
+        pass
+
+    def Create_Conf(self, max_parties=60):
+        path = '/default/conferences'
+        payload = {'appid': self.app}
+
+        conference = xmsrest.conference(max_parties=str(max_parties))
+        web_service = xmsrest.web_service(conference=conference)
+        web_service.set_version("1.0")
+        output = StringIO.StringIO()
+        web_service.export(output, 0)
+        data = output.getvalue()
+        print '-------------'
+        print data
+        print '-------------'
+        http_response = requests.post(self.url+path, params=payload, data=data)
+        print '===== Create_Conf ===='
+        print http_response.status_code, http_response.reason
+        print http_response.text
+        conf_href = None
+        conf_identifier = None
+        response = xmsrest.parseString(http_response.text)
+        if response.conference_response is not None:
+            conf_href = response.conference_response.href
+            conf_identifier = response.conference_response.identifier
+            print '-' * 10
+            print "href:" + conf_href
+            print "identifier:" + conf_identifier
+        return (
+            http_response.status_code, http_response.reason,
+            conf_href, conf_identifier)
+
+    def Drop_Conf(self, resource_type, resource_id):
+        path = '/default/conferences/' + resource_id
+        payload = {'appid': self.app}
+        response = requests.delete(self.url+path, params=payload)
+        print '===== Drop_Conf ===='
+        print response.status_code, response.reason
+        print response.text
+
+    def Add_Party(self, resource_type, resource_id, conf_identifier):
+        path = '/default/calls/' + resource_id
+        payload = {'appid': self.app}
+
+        add_party = xmsrest.add_party(
+            conf_id=conf_identifier, caption=resource_id,
+            audio="sendrecv", video="inactive")
+        call_action = xmsrest.call_action(add_party=add_party)
+        call = xmsrest.call(call_action=call_action)
+        web_service = xmsrest.web_service(call=call)
+        web_service.set_version("1.0")
+        output = StringIO.StringIO()
+        web_service.export(output, 0)
+        data = output.getvalue()
+
+        response = requests.put(self.url+path, params=payload, data=data)
+        print '===== Add_Party ===='
+        print response.status_code, response.reason
+        print response.text
+
+    def Remove_Party(self, resource_type, resource_id, conf_identifier):
+        path = '/default/calls/' + resource_id
+        payload = {'appid': self.app}
+
+        remove_party = xmsrest.remove_party(conf_id=conf_identifier)
+        call_action = xmsrest.call_action(remove_party=remove_party)
+        call = xmsrest.call(call_action=call_action)
+        web_service = xmsrest.web_service(call=call)
+        web_service.set_version("1.0")
+        output = StringIO.StringIO()
+        web_service.export(output, 0)
+        data = output.getvalue()
+
+        response = requests.put(self.url+path, params=payload, data=data)
+        print '===== Remove_Party ===='
+        print response.status_code, response.reason
+        print response.text
 
 
 if __name__ == "__main__":
