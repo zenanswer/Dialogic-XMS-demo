@@ -33,7 +33,7 @@ class Conference(xmsapp.XMSAPP):
             self, resource_type, resource_id, call_id, called_uri, caller_uri):
         self.Answer_Call(resource_type, resource_id)
         self.calls[resource_id] = CallLeg(resource_type, resource_id, call_id)
-        # TODO play "please input the PIN Code"
+        # play "please input the PIN Code"
         self.Play_Collect(
                 resource_type, resource_id,
                 'file://verification/verification_intro.wav', 6)
@@ -57,12 +57,18 @@ class Conference(xmsapp.XMSAPP):
                             self.confroom.conf_identifier)
                     callLeg.status = CallLegStatus['inConf']
                     self.confroom.paryies[resource_id] = resource_id
-                    # TODO play welcome message
+                    # play welcome message
+                    self.Play(
+                            'conference', self.confroom.conf_identifier,
+                            'file://verification/verification_intro.wav')
                     pass
                 else:
-                    # TODO play "wrong PIN code, byebye."
-                    self.Drop_Call(resource_type, resource_id)
+                    # play "wrong PIN code, byebye."
+                    self.Play(
+                            resource_type, resource_id,
+                            'file://vxml/goodbye.wav')
                     del self.calls[resource_id]
+                    self.Drop_Call(resource_type, resource_id)
                     pass
 
     def On_Hangup(self, resource_type, resource_id, reason):
@@ -75,11 +81,14 @@ class Conference(xmsapp.XMSAPP):
                         resource_type, resource_id,
                         self.confroom.conf_identifier)
                 del self.confroom.paryies[resource_id]
-                # TODO play some leave message
                 if len(self.confroom.paryies) == 0:
                     self.Drop_Conf("", self.confroom.conf_identifier)
                     self.confroom = None
-                pass
+                else:
+                    # play some leave message
+                    self.Play(
+                            'conference', self.confroom.conf_identifier,
+                            'file://generic/audio/exit.wav')
             del self.calls[resource_id]
 
 

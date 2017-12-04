@@ -89,28 +89,49 @@ class XMSAPP(object):
         print response.text
 
     def Play(self, resource_type, resource_id, audio_file):
-        path = '/default/calls/' + resource_id
         payload = {'appid': self.app}
+        path = '/default/'
+        if resource_type == 'call':
+            path += 'calls/'
+        elif resource_type == 'conference':
+            path += 'conferences/'
+        else:
+            raise Exception('Unknown resource_type')
+        path += resource_id
+        # print '===================', path
 
         play_source = xmsrest.play_source(
                 audio_uri=audio_file, audio_type='audio/x-wav')
         play = xmsrest.play(play_source=play_source)
-        call_action = xmsrest.call_action(play=play)
-        call = xmsrest.call(call_action=call_action)
-        web_service = xmsrest.web_service(call=call)
+        web_service = None
+        if resource_type == 'call':
+            call_action = xmsrest.call_action(play=play)
+            call = xmsrest.call(call_action=call_action)
+            web_service = xmsrest.web_service(call=call)
+        elif resource_type == 'conference':
+            conf_action = xmsrest.conf_action(play=play)
+            conference = xmsrest.conference(conf_action=conf_action)
+            web_service = xmsrest.web_service(conference=conference)
         web_service.set_version("1.0")
         output = StringIO.StringIO()
         web_service.export(output, 0)
         data = output.getvalue()
 
         response = requests.put(self.url+path, params=payload, data=data)
-        print '===== Play ===='
+        print '===== Play on %s =====' % resource_type
         print response.status_code, response.reason
         print response.text
 
     def Play_Collect(self, resource_type, resource_id, audio_file, digit_num):
-        path = '/default/calls/' + resource_id
         payload = {'appid': self.app}
+        path = '/default/'
+        if resource_type == 'call':
+            path += 'calls/'
+        elif resource_type == 'conference':
+            path += 'conferences/'
+        else:
+            raise Exception('Unknown resource_type')
+        path += resource_id
 
         timeout = 2
 
@@ -122,9 +143,15 @@ class XMSAPP(object):
                 max_digits=str(digit_num),
                 timeout=str(int(timeout*digit_num*1.5)) + 's',
                 interdigit_timeout=str(timeout) + 's')
-        call_action = xmsrest.call_action(playcollect=playcollect)
-        call = xmsrest.call(call_action=call_action)
-        web_service = xmsrest.web_service(call=call)
+        web_service = None
+        if resource_type == 'call':
+            call_action = xmsrest.call_action(playcollect=playcollect)
+            call = xmsrest.call(call_action=call_action)
+            web_service = xmsrest.web_service(call=call)
+        elif resource_type == 'conference':
+            conf_action = xmsrest.conf_action(playcollect=playcollect)
+            conference = xmsrest.conference(conf_action=conf_action)
+            web_service = xmsrest.web_service(conference=conference)
         web_service.set_version("1.0")
         output = StringIO.StringIO()
         web_service.export(output, 0)
@@ -133,7 +160,7 @@ class XMSAPP(object):
         print data
         print '-------------'
         response = requests.put(self.url+path, params=payload, data=data)
-        print '===== Play_Collect ===='
+        print '===== Play_Collect on %s =====' % resource_type
         print response.status_code, response.reason
         print response.text
 
