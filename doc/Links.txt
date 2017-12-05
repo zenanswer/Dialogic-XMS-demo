@@ -1,0 +1,17 @@
+https://www.dialogic.com/manuals/xms/xms3-5
+
+PowerMedia XMS RESTful API User's Guide - updated October 17, 2017
+https://www.dialogic.com/webhelp/XMS/3.5/XMS_RESTfulAPIUser.pdf
+
+PowerMedia XMS RESTful Management API User's Guide - updated May 27, 2016
+https://www.dialogic.com/webhelp/XMS/3.5/XMS_RESTfulMgmtAPIUser.pdf
+
+
+Using XMLBeans to Simplify Dialogic® PowerMedia™ Extended Media Server (XMS) RESTful Application Programming in Java
+https://www.dialogic.com/media-server-software/download/xms-developers-page#xml_beans
+
+Tech Note
+https://www.dialogic.com/-/media/products/media-server-software/download/xms-demos/xms-xmlbeans_technote_20130405.pdf?la=en
+
+Additional Material
+https://www.dialogic.com/-/media/products/media-server-software/download/xms-demos/xms-xmlbeans_material_20130405.tgz?la=en
