@@ -378,6 +378,69 @@ class XMSAPP(object):
         print response.status_code, response.reason
         print response.text
 
+    def Create_MRCP(self, asr=False, tts=True):
+        path = '/default/mrcps'
+        payload = {'appid': self.app}
+
+        mrcp = xmsrest.mrcp(
+            asr=("yes" if asr else "no"),
+            tts=("yes" if tts else "no"))
+        web_service = xmsrest.web_service(mrcp=mrcp)
+        web_service.set_version("1.0")
+        output = StringIO.StringIO()
+        web_service.export(output, 0)
+        data = output.getvalue()
+        print '-------------'
+        print data
+        print '-------------'
+        headers = {'Content-Type': 'application/xml'}
+        http_response = requests.post(
+            self.url+path, params=payload, data=data, headers=headers)
+        print '===== Create_MRCP ===='
+        print http_response.status_code, http_response.reason
+        print http_response.text
+        mrcp_href = None
+        mrcp_identifier = None
+        response = xmsrest.parseString(http_response.text)
+        if response.mrcp_response is not None:
+            mrcp_href = response.mrcp_response.href
+            mrcp_identifier = response.mrcp_response.identifier
+            print '-' * 10
+            print "href:" + mrcp_href
+            print "identifier:" + mrcp_identifier
+        return (
+            http_response.status_code, http_response.reason,
+            mrcp_href, mrcp_identifier)
+
+    def Speak(
+            self, resource_type, resource_id, call_type, call_id,
+            content, content_type='text/plain'):
+        payload = {'appid': self.app}
+        path = '/default/mrcps/' + resource_id
+
+        speak = xmsrest.speak(
+            call_id=call_id, content=content, content_type=content_type)
+        mrcp_action = xmsrest.mrcp_action(speak=speak)
+        mrcp = xmsrest.mrcp(mrcp_action=mrcp_action)
+        web_service = xmsrest.web_service(mrcp=mrcp)
+        web_service.set_version("1.0")
+        output = StringIO.StringIO()
+        web_service.export(output, 0)
+        data = output.getvalue()
+
+        response = requests.put(self.url+path, params=payload, data=data)
+        print '===== Speak on %s =====' % call_type
+        print response.status_code, response.reason
+        print response.text
+
+    def Drop_MRCP(self, resource_type, resource_id):
+        path = '/default/mrcps/' + resource_id
+        payload = {'appid': self.app}
+        response = requests.delete(self.url+path, params=payload)
+        print '===== Drop_MRCP ===='
+        print response.status_code, response.reason
+        print response.text
+
 
 if __name__ == "__main__":
     appclient = XMSAPP()
