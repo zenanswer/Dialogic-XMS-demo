@@ -6,6 +6,8 @@ File list
 -   xmsapp.py - Python wrapper for Dialogic XMS RESTFull API
 -   earlymediaandplay.py - Sample code for showing early-media, play audio and play&collect.
 -   conference.py - Sample code for conference room
+-   conference_clear.py - Sample code for clear all conference room
+-   restfulmgmtapitest.py - Sample code for using XMS Management API
 -   README.md - README file
 
 Dialogic XMS XSD file for RESTFull API
