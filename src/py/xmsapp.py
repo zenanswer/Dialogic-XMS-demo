@@ -220,6 +220,29 @@ class XMSAPP(object):
                 print "href:" + call_response_item.href
                 print "identifier:" + call_response_item.identifier
 
+    def Get_AllConfResources(self):
+        path = '/default/conferences'
+        payload = {'appid': self.app}
+        http_response = requests.get(self.url+path, params=payload)
+        print '===== Get_AllConfResources ===='
+        print http_response.text
+        print '=' * 10
+        response = xmsrest.parseString(http_response.text)
+        # print response.calls_response.size
+        conferences = []
+        if(response.conferences_response is not None
+                and response.conferences_response.size > '0'):
+            conferences_response = response.conferences_response
+            for conference_item in conferences_response.conference_response:
+                print '-' * 10
+                print "max_parties:" + conference_item.max_parties
+                # using "type_" here, but not "type"
+                print "type:" + conference_item.type_
+                print "href:" + conference_item.href
+                print "identifier:" + conference_item.identifier
+                conferences.append(conference_item.identifier)
+        return conferences
+
     def Create_EventHandler(self):
         path = '/default/eventhandlers'
         payload = {'appid': self.app}
